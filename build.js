@@ -41,6 +41,9 @@ child.on('exit', function(code){
   ).replace(
     `process["on"]("unhandledRejection",abort);`,
     ''
+  ).replace(
+    `process["on"]("unhandledRejection",function(reason){throw reason});`,
+    ''
   )
 
   // needed in order for the library to work in the browser
