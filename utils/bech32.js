@@ -1,4 +1,4 @@
-const bech32 = require('bech32')
+const {bech32} = require('bech32')
 const {validateString, validateBuffer} = require('./validation')
 
 function encode(prefix, data) {

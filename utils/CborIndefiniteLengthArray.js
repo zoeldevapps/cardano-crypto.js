@@ -1,4 +1,4 @@
-const cbor = require('borc')
+const cbor = require('cbor')
 module.exports = class CborIndefiniteLengthArray {
   constructor(elements) {
     this.elements = elements
