@@ -1,7 +1,7 @@
 const bip39 = require("bip39");
-const { mnemonicToRootKeypair } = require("../features/key-derivation");
 const { randomBytes } = require("node:crypto");
-const { cardanoMemoryCombine } = require("../features/crypto-primitives");
+const { mnemonicToRootKeypair } = require("../src/features/key-derivation");
+const { cardanoMemoryCombine } = require("../src/features/crypto-primitives");
 
 const ITERATION_COUNT = 1000;
 const MNEMONIC_LENGTH = 24;

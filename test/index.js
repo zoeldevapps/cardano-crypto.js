@@ -1,6 +1,6 @@
 const test = require('tape')
-const lib = require('..')
-const { AddressTypes, BaseAddressTypes } = require('../features/address')
+const lib = require('../src')
+const { AddressTypes, BaseAddressTypes } = require('../src/features/address')
 
 const sampleWalletMnemonicV1 = 'logic easily waste eager injury oval sentence wine bomb embrace gossip supreme'
 const sampleWalletMnemonicV2 = 'cost dash dress stove morning robust group affair stomach vacant route volume yellow salute laugh'

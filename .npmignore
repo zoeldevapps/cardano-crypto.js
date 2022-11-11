@@ -1,7 +1,5 @@
 test
-vendor
-cardano-crypto.c
-build.js
+native
 .npmignore
 .gitignore
 

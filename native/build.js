@@ -1,5 +1,8 @@
 var exec = require('child_process').exec
 var fs = require('fs')
+const path = require('path')
+
+const OUT_FILE = path.join('..', 'src', 'lib.js')
 
 var files = [
   'vendor/cbits/ed25519/ed25519.c',
@@ -16,7 +19,7 @@ var files = [
   'vendor/cbits/chachapoly/chachapoly.c',
   'vendor/cbits/chachapoly/poly1305.c',
 ]
-var command = `emcc cardano-crypto.c ${files.join(' ')} -o lib.js -Os -s WASM=0 -s EXPORTED_FUNCTIONS='["_malloc", "_free"]' --memory-init-file 0  -s NODEJS_CATCH_EXIT=0`
+var command = `emcc cardano-crypto.c ${files.join(' ')} -o ${OUT_FILE} -Os -s WASM=0 -s EXPORTED_FUNCTIONS='["_malloc", "_free"]' --memory-init-file 0  -s NODEJS_CATCH_EXIT=0`
 var child = exec(command, function(err){
   if(err){
     throw err
@@ -34,7 +37,7 @@ child.on('exit', function(code){
   * in newer versions of emscripten (see https://github.com/emscripten-core/emscripten/issues/7855)
   * but we experience performance problems with them (see README.md), hence the hotfix.
   */
-  var originalLib = fs.readFileSync('lib.js', 'utf-8')
+  var originalLib = fs.readFileSync(OUT_FILE, 'utf-8')
   var patchedLib = originalLib.replace(
     `process["on"]("unhandledRejection",(function(reason,p){process["exit"](1)}));`,
     ''
@@ -52,5 +55,5 @@ child.on('exit', function(code){
   // closes #31 - needed for react-native environment
   patchedLib = patchedLib.replace('(document.currentScript)', '(typeof document !== "undefined" && document.currentScript)')
 
-  fs.writeFileSync('lib.js', patchedLib, 'utf-8')
+  fs.writeFileSync(OUT_FILE, patchedLib, 'utf-8')
 })
