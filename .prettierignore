@@ -1,1 +1,5 @@
-src/utils/script-async.js
+src/utils/scrypt-async.js
+src/lib.js
+dist
+node_modules
+emsdk

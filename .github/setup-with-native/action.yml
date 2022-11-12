@@ -1,0 +1,41 @@
+name: Prepare build
+description: Install emsdk and build native libs
+inputs:
+  emsdk-version:
+    description: 'EMSDK version'
+    required: true
+    default: '3.1.15'
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout emsdk
+      uses: actions/checkout@v3
+      with:
+        path: 'emsdk'
+        repository: 'emscripten-core/emsdk'
+    - name: emsdk cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          emsdk/node
+          emsdk/upstream
+        key: emsdk-${{ runner.os }}-${{ inputs.emsdk-version }}
+        restore-keys: emsdk-${{ runner.os }}-
+    - name: Build native
+      run: |
+        cd emsdk
+        ./emsdk install ${{ inputs.emsdk-version }}
+        ./emsdk activate ${{ inputs.emsdk-version }}
+        source ./emsdk_env.sh
+        cd ../native
+        node build.js
+      shell: bash
+    - name: Setup node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    - run: npm ci
+      shell: bash
