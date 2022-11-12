@@ -1,5 +1,5 @@
-import { bech32 } from "bech32";
-import { validateString, validateBuffer } from "./validation";
+import { bech32 } from 'bech32';
+import { validateString, validateBuffer } from './validation';
 
 export function encode(prefix: string, data: Buffer) {
   validateString(prefix);

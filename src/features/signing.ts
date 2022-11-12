@@ -1,5 +1,5 @@
-import { validateBuffer } from "../utils/validation";
-import Module from "../lib.js";
+import { validateBuffer } from '../utils/validation';
+import Module from '../lib.js';
 
 export function sign(msg: Buffer, keypair: Buffer) {
   validateBuffer(msg);
@@ -33,11 +33,7 @@ export function verify(msg: Buffer, publicKey: Buffer, sig: Buffer) {
   const msgArrPtr = Module._malloc(msgLen);
   const msgArr = new Uint8Array(Module.HEAPU8.buffer, msgArrPtr, msgLen);
   const publicKeyArrPtr = Module._malloc(32);
-  const publicKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    publicKeyArrPtr,
-    32
-  );
+  const publicKeyArr = new Uint8Array(Module.HEAPU8.buffer, publicKeyArrPtr, 32);
   const sigPtr = Module._malloc(64);
   const sigArr = new Uint8Array(Module.HEAPU8.buffer, sigPtr, 64);
 
@@ -45,8 +41,7 @@ export function verify(msg: Buffer, publicKey: Buffer, sig: Buffer) {
   publicKeyArr.set(publicKey);
   sigArr.set(sig);
 
-  const result =
-    Module._emscripten_verify(msgArrPtr, msgLen, publicKeyArrPtr, sigPtr) === 0;
+  const result = Module._emscripten_verify(msgArrPtr, msgLen, publicKeyArrPtr, sigPtr) === 0;
 
   Module._free(msgArrPtr);
   Module._free(publicKeyArrPtr);

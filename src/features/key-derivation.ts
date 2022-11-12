@@ -1,24 +1,21 @@
-import { mnemonicToEntropy } from "bip39";
+import { mnemonicToEntropy } from 'bip39';
 import {
   validateBuffer,
   validateDerivationIndex,
   validateDerivationScheme,
   validateMnemonic,
-} from "../utils/validation";
-import * as crypto from "./crypto-primitives";
-import pbkdf2 from "../utils/pbkdf2";
-import Module from "../lib.js";
+} from '../utils/validation';
+import * as crypto from './crypto-primitives';
+import pbkdf2 from '../utils/pbkdf2';
+import Module from '../lib.js';
 
-export async function mnemonicToRootKeypair(
-  mnemonic: string,
-  derivationScheme: number
-) {
+export async function mnemonicToRootKeypair(mnemonic: string, derivationScheme: number) {
   validateDerivationScheme(derivationScheme);
 
   if (derivationScheme === 1) {
     return mnemonicToRootKeypairV1(mnemonic);
   } else if (derivationScheme === 2) {
-    return mnemonicToRootKeypairV2(mnemonic, "");
+    return mnemonicToRootKeypairV2(mnemonic, '');
   } else {
     throw Error(`Derivation scheme ${derivationScheme} not implemented`);
   }
@@ -31,7 +28,7 @@ function mnemonicToRootKeypairV1(mnemonic: string) {
 
 function mnemonicToSeedV1(mnemonic: string) {
   validateMnemonic(mnemonic);
-  const entropy = Buffer.from(mnemonicToEntropy(mnemonic), "hex");
+  const entropy = Buffer.from(mnemonicToEntropy(mnemonic), 'hex');
 
   return cborEncodeBuffer(crypto.blake2b(cborEncodeBuffer(entropy), 32));
 }
@@ -40,15 +37,13 @@ function seedToKeypairV1(seed: Buffer) {
   let result: Buffer | undefined;
   for (let i = 1; result === undefined && i <= 1000; i++) {
     try {
-      const digest = crypto.hmac_sha512(seed, [
-        Buffer.from(`Root Seed Chain ${i}`, "ascii"),
-      ]);
+      const digest = crypto.hmac_sha512(seed, [Buffer.from(`Root Seed Chain ${i}`, 'ascii')]);
       const tempSeed = digest.slice(0, 32);
       const chainCode = digest.slice(32, 64);
 
       result = trySeedChainCodeToKeypairV1(tempSeed, chainCode);
     } catch (e) {
-      if (e.name === "InvalidKeypair") {
+      if (e.name === 'InvalidKeypair') {
         continue;
       }
 
@@ -57,10 +52,8 @@ function seedToKeypairV1(seed: Buffer) {
   }
 
   if (result === undefined) {
-    const e = new Error(
-      "Secret key generation from mnemonic is looping forever"
-    );
-    e.name = "RuntimeException";
+    const e = new Error('Secret key generation from mnemonic is looping forever');
+    e.name = 'RuntimeException';
     throw e;
   }
 
@@ -74,30 +67,22 @@ function trySeedChainCodeToKeypairV1(seed: Buffer, chainCode: Buffer) {
   const seedArrPtr = Module._malloc(32);
   const seedArr = new Uint8Array(Module.HEAPU8.buffer, seedArrPtr, 32);
   const chainCodeArrPtr = Module._malloc(32);
-  const chainCodeArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    chainCodeArrPtr,
-    32
-  );
+  const chainCodeArr = new Uint8Array(Module.HEAPU8.buffer, chainCodeArrPtr, 32);
   const keypairArrPtr = Module._malloc(128);
   const keypairArr = new Uint8Array(Module.HEAPU8.buffer, keypairArrPtr, 128);
 
   seedArr.set(seed);
   chainCodeArr.set(chainCode);
 
-  const returnCode = Module._emscripten_wallet_secret_from_seed(
-    seedArrPtr,
-    chainCodeArrPtr,
-    keypairArrPtr
-  );
+  const returnCode = Module._emscripten_wallet_secret_from_seed(seedArrPtr, chainCodeArrPtr, keypairArrPtr);
 
   Module._free(seedArrPtr);
   Module._free(chainCodeArrPtr);
   Module._free(keypairArrPtr);
 
   if (returnCode === 1) {
-    const e = new Error("Invalid keypair");
-    e.name = "InvalidKeypair";
+    const e = new Error('Invalid keypair');
+    e.name = 'InvalidKeypair';
 
     throw e;
   }
@@ -105,10 +90,7 @@ function trySeedChainCodeToKeypairV1(seed: Buffer, chainCode: Buffer) {
   return Buffer.from(keypairArr);
 }
 
-async function mnemonicToRootKeypairV2(
-  mnemonic: string,
-  password: string | Buffer
-) {
+async function mnemonicToRootKeypairV2(mnemonic: string, password: string | Buffer) {
   const seed = mnemonicToSeedV2(mnemonic);
 
   return seedToKeypairV2(seed, password);
@@ -116,14 +98,11 @@ async function mnemonicToRootKeypairV2(
 
 function mnemonicToSeedV2(mnemonic: string) {
   validateMnemonic(mnemonic);
-  return Buffer.from(mnemonicToEntropy(mnemonic), "hex");
+  return Buffer.from(mnemonicToEntropy(mnemonic), 'hex');
 }
 
-async function seedToKeypairV2(
-  seed: string | Buffer,
-  password: string | Buffer
-) {
-  const xprv = await pbkdf2(password, seed, 4096, 96, "sha512");
+async function seedToKeypairV2(seed: string | Buffer, password: string | Buffer) {
+  const xprv = await pbkdf2(password, seed, 4096, 96, 'sha512');
 
   xprv[0] &= 248;
   xprv[31] &= 31;
@@ -138,17 +117,9 @@ export function toPublic(privateKey: Buffer) {
   validateBuffer(privateKey, 64);
 
   const privateKeyArrPtr = Module._malloc(64);
-  const privateKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    privateKeyArrPtr,
-    64
-  );
+  const privateKeyArr = new Uint8Array(Module.HEAPU8.buffer, privateKeyArrPtr, 64);
   const publicKeyArrPtr = Module._malloc(32);
-  const publicKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    publicKeyArrPtr,
-    32
-  );
+  const publicKeyArr = new Uint8Array(Module.HEAPU8.buffer, publicKeyArrPtr, 32);
 
   privateKeyArr.set(privateKey);
 
@@ -160,43 +131,26 @@ export function toPublic(privateKey: Buffer) {
   return Buffer.from(publicKeyArr);
 }
 
-export function derivePrivate(
-  parentKey: Buffer,
-  index: number,
-  derivationScheme: number
-) {
+export function derivePrivate(parentKey: Buffer, index: number, derivationScheme: number) {
   validateBuffer(parentKey, 128);
   validateDerivationIndex(index);
   validateDerivationScheme(derivationScheme);
 
   const parentKeyArrPtr = Module._malloc(128);
-  const parentKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    parentKeyArrPtr,
-    128
-  );
+  const parentKeyArr = new Uint8Array(Module.HEAPU8.buffer, parentKeyArrPtr, 128);
   const childKeyArrPtr = Module._malloc(128);
   const childKeyArr = new Uint8Array(Module.HEAPU8.buffer, childKeyArrPtr, 128);
 
   parentKeyArr.set(parentKey);
 
-  Module._emscripten_derive_private(
-    parentKeyArrPtr,
-    index,
-    childKeyArrPtr,
-    derivationScheme
-  );
+  Module._emscripten_derive_private(parentKeyArrPtr, index, childKeyArrPtr, derivationScheme);
   Module._free(parentKeyArrPtr);
   Module._free(childKeyArrPtr);
 
   return Buffer.from(childKeyArr);
 }
 
-export function derivePublic(
-  parentExtPubKey: Buffer,
-  index: number,
-  derivationScheme: number
-) {
+export function derivePublic(parentExtPubKey: Buffer, index: number, derivationScheme: number) {
   validateBuffer(parentExtPubKey, 64);
   validateDerivationIndex(index);
   validateDerivationScheme(derivationScheme);
@@ -205,30 +159,14 @@ export function derivePublic(
   const parentChainCode = parentExtPubKey.slice(32, 64);
 
   const parentPubKeyArrPtr = Module._malloc(32);
-  const parentPubKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    parentPubKeyArrPtr,
-    32
-  );
+  const parentPubKeyArr = new Uint8Array(Module.HEAPU8.buffer, parentPubKeyArrPtr, 32);
   const parentChainCodeArrPtr = Module._malloc(32);
-  const parentChainCodeArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    parentChainCodeArrPtr,
-    32
-  );
+  const parentChainCodeArr = new Uint8Array(Module.HEAPU8.buffer, parentChainCodeArrPtr, 32);
 
   const childPubKeyArrPtr = Module._malloc(32);
-  const childPubKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    childPubKeyArrPtr,
-    32
-  );
+  const childPubKeyArr = new Uint8Array(Module.HEAPU8.buffer, childPubKeyArrPtr, 32);
   const childChainCodeArrPtr = Module._malloc(32);
-  const childChainCodeArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    childChainCodeArrPtr,
-    32
-  );
+  const childChainCodeArr = new Uint8Array(Module.HEAPU8.buffer, childChainCodeArrPtr, 32);
 
   parentPubKeyArr.set(parentPubKey);
   parentChainCodeArr.set(parentChainCode);
@@ -251,10 +189,7 @@ export function derivePublic(
     throw Error(`derivePublic has exited with code ${resultCode}`);
   }
 
-  return Buffer.concat([
-    Buffer.from(childPubKeyArr),
-    Buffer.from(childChainCodeArr),
-  ]);
+  return Buffer.concat([Buffer.from(childPubKeyArr), Buffer.from(childChainCodeArr)]);
 }
 
 function cborEncodeBuffer(input: Buffer) {
@@ -268,7 +203,7 @@ function cborEncodeBuffer(input: Buffer) {
   } else if (len < 256) {
     cborPrefix = [0x58, len];
   } else {
-    throw Error("CBOR encode for more than 256 bytes not yet implemented");
+    throw Error('CBOR encode for more than 256 bytes not yet implemented');
   }
 
   return Buffer.concat([Buffer.from(cborPrefix), input]);

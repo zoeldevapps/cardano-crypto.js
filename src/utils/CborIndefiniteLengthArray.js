@@ -1,7 +1,7 @@
-const cbor = require('cbor')
+const cbor = require('cbor');
 module.exports = class CborIndefiniteLengthArray {
   constructor(elements) {
-    this.elements = elements
+    this.elements = elements;
   }
 
   encodeCBOR(encoder) {
@@ -11,6 +11,6 @@ module.exports = class CborIndefiniteLengthArray {
         ...this.elements.map((e) => cbor.encode(e)),
         Buffer.from([0xff]), // end of array
       ])
-    )
+    );
   }
-}
+};

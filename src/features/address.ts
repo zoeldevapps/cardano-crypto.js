@@ -1,16 +1,11 @@
-import * as cbor from "cbor";
-import {
-  chacha20poly1305Encrypt,
-  chacha20poly1305Decrypt,
-  blake2b,
-  sha3_256,
-} from "./crypto-primitives";
-import crc32 from "../utils/crc32";
-import base58 from "../utils/base58";
-import * as bech32 from "../utils/bech32";
-import pbkdf2 from "../utils/pbkdf2";
-import variableLengthEncode from "../utils/variableLengthEncode";
-import CborIndefiniteLengthArray from "../utils/CborIndefiniteLengthArray";
+import * as cbor from 'cbor';
+import { chacha20poly1305Encrypt, chacha20poly1305Decrypt, blake2b, sha3_256 } from './crypto-primitives';
+import crc32 from '../utils/crc32';
+import base58 from '../utils/base58';
+import * as bech32 from '../utils/bech32';
+import pbkdf2 from '../utils/pbkdf2';
+import variableLengthEncode from '../utils/variableLengthEncode';
+import CborIndefiniteLengthArray from '../utils/CborIndefiniteLengthArray';
 import {
   validateBuffer,
   validateDerivationScheme,
@@ -18,7 +13,7 @@ import {
   validateString,
   validateNetworkId,
   validateUint32,
-} from "../utils/validation";
+} from '../utils/validation';
 
 export type BIP32Path = number[];
 
@@ -68,21 +63,15 @@ export type Pointer = {
 };
 
 function validatePointer(input: Pointer) {
-  if (
-    !input.hasOwnProperty("blockIndex") ||
-    !input.hasOwnProperty("txIndex") ||
-    !input.hasOwnProperty("certificateIndex")
-  ) {
-    throw new Error(
-      "Invalid pointer! Missing one of blockIndex, txIndex, certificateIndex"
-    );
+  if (!('blockIndex' in input) || !('txIndex' in input) || !('certificateIndex' in input)) {
+    throw new Error('Invalid pointer! Missing one of blockIndex, txIndex, certificateIndex');
   }
   if (
     !Number.isInteger(input.blockIndex) ||
     !Number.isInteger(input.txIndex) ||
     !Number.isInteger(input.certificateIndex)
   ) {
-    throw new Error("Invalid pointer! values must be integer");
+    throw new Error('Invalid pointer! values must be integer');
   }
 }
 
@@ -115,24 +104,18 @@ export function packBootstrapAddress(
     addressAttributes.set(2, cbor.encode(protocolMagic));
   }
 
-  const getAddressRootHash = (input) =>
-    blake2b(sha3_256(cbor.encode(input)), 28);
+  const getAddressRootHash = (input) => blake2b(sha3_256(cbor.encode(input)), 28);
 
   const addressRoot = getAddressRootHash([
     0,
     [0, xpub],
-    addressPayload.length > 0
-      ? new Map([[1, cbor.encode(addressPayload)]])
-      : new Map(),
+    addressPayload.length > 0 ? new Map([[1, cbor.encode(addressPayload)]]) : new Map(),
   ]);
   const addressType = 0; // Public key address
   const addressData = [addressRoot, addressAttributes, addressType];
   const addressDataEncoded = cbor.encode(addressData);
 
-  return cbor.encode([
-    new cbor.Tagged(24, addressDataEncoded),
-    crc32(addressDataEncoded),
-  ]);
+  return cbor.encode([new cbor.Tagged(24, addressDataEncoded), crc32(addressDataEncoded)]);
 }
 
 function getAddressHeader(addressType: AddressType, networkId: number) {
@@ -156,11 +139,7 @@ export function packBaseAddress(
   validateNetworkId(networkId);
   validateUint32(type);
 
-  return Buffer.concat([
-    getAddressHeader(AddressTypes.BASE | type, networkId),
-    spendingHash,
-    stakingHash,
-  ]);
+  return Buffer.concat([getAddressHeader(AddressTypes.BASE | type, networkId), spendingHash, stakingHash]);
 }
 
 export function packPointerAddress(
@@ -176,10 +155,7 @@ export function packPointerAddress(
   const { blockIndex, txIndex, certificateIndex } = pointer;
 
   return Buffer.concat([
-    getAddressHeader(
-      isScript ? AddressTypes.POINTER_SCRIPT : AddressTypes.POINTER,
-      networkId
-    ),
+    getAddressHeader(isScript ? AddressTypes.POINTER_SCRIPT : AddressTypes.POINTER, networkId),
     spendingHash,
     Buffer.concat([
       variableLengthEncode(blockIndex),
@@ -189,36 +165,22 @@ export function packPointerAddress(
   ]);
 }
 
-export function packEnterpriseAddress(
-  spendingHash: Buffer,
-  networkId: number,
-  isScript?: boolean
-) {
+export function packEnterpriseAddress(spendingHash: Buffer, networkId: number, isScript?: boolean) {
   validateBuffer(spendingHash, KEY_HASH_LEN);
   validateNetworkId(networkId);
 
   return Buffer.concat([
-    getAddressHeader(
-      isScript ? AddressTypes.ENTERPRISE_SCRIPT : AddressTypes.ENTERPRISE,
-      networkId
-    ),
+    getAddressHeader(isScript ? AddressTypes.ENTERPRISE_SCRIPT : AddressTypes.ENTERPRISE, networkId),
     spendingHash,
   ]);
 }
 
-export function packRewardAddress(
-  stakingHash: Buffer,
-  networkId: number,
-  isScript?: boolean
-) {
+export function packRewardAddress(stakingHash: Buffer, networkId: number, isScript?: boolean) {
   validateBuffer(stakingHash, KEY_HASH_LEN);
   validateNetworkId(networkId);
 
   return Buffer.concat([
-    getAddressHeader(
-      isScript ? AddressTypes.REWARD_SCRIPT : AddressTypes.REWARD,
-      networkId
-    ),
+    getAddressHeader(isScript ? AddressTypes.REWARD_SCRIPT : AddressTypes.REWARD, networkId),
     stakingHash,
   ]);
 }
@@ -238,10 +200,7 @@ export function getBootstrapAddressAttributes(addressBuffer: Buffer) {
   return addressAttributes;
 }
 
-export function getBootstrapAddressDerivationPath(
-  addressBuffer: Buffer,
-  hdPassphrase: Buffer
-) {
+export function getBootstrapAddressDerivationPath(addressBuffer: Buffer, hdPassphrase: Buffer) {
   const addressAttributes = getBootstrapAddressAttributes(addressBuffer);
   const addressPayloadCbor = addressAttributes.get(1);
 
@@ -254,19 +213,17 @@ export function getBootstrapAddressDerivationPath(
   try {
     derivationPath = decryptDerivationPath(addressPayload, hdPassphrase);
   } catch (e) {
-    throw new Error("Unable to get derivation path from address");
+    throw new Error('Unable to get derivation path from address');
   }
 
   if (derivationPath && derivationPath.length > 2) {
-    throw Error("Invalid derivation path length, should be at most 2");
+    throw Error('Invalid derivation path length, should be at most 2');
   }
 
   return derivationPath;
 }
 
-export function getBootstrapAddressProtocolMagic(
-  addressBuffer: Buffer
-): number {
+export function getBootstrapAddressProtocolMagic(addressBuffer: Buffer): number {
   const addressAttributes = getBootstrapAddressAttributes(addressBuffer);
 
   const protocolMagicCbor = addressAttributes.get(2);
@@ -340,11 +297,9 @@ export function hasSpendingScript(addressBuffer: Buffer) {
 export function hasStakingScript(addressBuffer: Buffer) {
   validateBuffer(addressBuffer);
 
-  return [
-    AddressTypes.BASE_KEY_SCRIPT,
-    AddressTypes.BASE_SCRIPT_SCRIPT,
-    AddressTypes.REWARD_SCRIPT,
-  ].includes(getAddressType(addressBuffer));
+  return [AddressTypes.BASE_KEY_SCRIPT, AddressTypes.BASE_SCRIPT_SCRIPT, AddressTypes.REWARD_SCRIPT].includes(
+    getAddressType(addressBuffer)
+  );
 }
 
 export function getShelleyAddressNetworkId(addressBuffer: Buffer) {
@@ -353,40 +308,28 @@ export function getShelleyAddressNetworkId(addressBuffer: Buffer) {
   return addressBuffer[0] & 15;
 }
 
-function encryptDerivationPath(
-  derivationPath: BIP32Path,
-  hdPassphrase: Buffer
-) {
-  const serializedDerivationPath = cbor.encode(
-    new CborIndefiniteLengthArray(derivationPath)
-  );
+function encryptDerivationPath(derivationPath: BIP32Path, hdPassphrase: Buffer) {
+  const serializedDerivationPath = cbor.encode(new CborIndefiniteLengthArray(derivationPath));
 
-  return chacha20poly1305Encrypt(
-    serializedDerivationPath,
-    hdPassphrase,
-    Buffer.from("serokellfore")
-  );
+  return chacha20poly1305Encrypt(serializedDerivationPath, hdPassphrase, Buffer.from('serokellfore'));
 }
 
-function decryptDerivationPath(
-  addressPayload: Buffer,
-  hdPassphrase: Buffer
-): BIP32Path {
+function decryptDerivationPath(addressPayload: Buffer, hdPassphrase: Buffer): BIP32Path {
   const decipheredDerivationPath = chacha20poly1305Decrypt(
     addressPayload,
     hdPassphrase,
-    Buffer.from("serokellfore")
+    Buffer.from('serokellfore')
   );
 
   try {
     return cbor.decode(Buffer.from(decipheredDerivationPath));
   } catch (err) {
-    throw new Error("incorrect address or passphrase");
+    throw new Error('incorrect address or passphrase');
   }
 }
 
 export async function xpubToHdPassphrase(xpub: Buffer): Promise<Buffer> {
   validateBuffer(xpub, 64);
 
-  return pbkdf2(xpub, "address-hashing", 500, 32, "sha512");
+  return pbkdf2(xpub, 'address-hashing', 500, 32, 'sha512');
 }

@@ -1,10 +1,6 @@
-import Module from "../lib.js";
+import Module from '../lib.js';
 
-import {
-  validateBuffer,
-  validateString,
-  validateArray,
-} from "../utils/validation";
+import { validateBuffer, validateString, validateArray } from '../utils/validation';
 
 export function blake2b(input: Buffer, outputLen: number) {
   validateBuffer(input);
@@ -13,11 +9,7 @@ export function blake2b(input: Buffer, outputLen: number) {
   const inputArrPtr = Module._malloc(inputLen);
   const inputArr = new Uint8Array(Module.HEAPU8.buffer, inputArrPtr, inputLen);
   const outputArrPtr = Module._malloc(outputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    outputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, outputLen);
 
   inputArr.set(input);
 
@@ -36,23 +28,15 @@ export function hmac_sha512(initKey: Buffer, inputs: Buffer[]) {
 
   const ctxLen = Module._emscripten_size_of_hmac_sha512_ctx();
   const ctxArrPtr = Module._malloc(ctxLen);
-  const ctxArr = new Uint8Array(Module.HEAPU8.buffer, ctxArrPtr, ctxLen);
+  const _ctxArr = new Uint8Array(Module.HEAPU8.buffer, ctxArrPtr, ctxLen);
 
   const initKeyLen = initKey.length;
   const initKeyArrPtr = Module._malloc(initKeyLen);
-  const initKeyArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    initKeyArrPtr,
-    initKeyLen
-  );
+  const initKeyArr = new Uint8Array(Module.HEAPU8.buffer, initKeyArrPtr, initKeyLen);
 
   const outputLen = 64;
   const outputArrPtr = Module._malloc(outputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    outputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, outputLen);
 
   initKeyArr.set(initKey);
 
@@ -61,11 +45,7 @@ export function hmac_sha512(initKey: Buffer, inputs: Buffer[]) {
   for (let i = 0; i < inputs.length; i++) {
     const inputLen = inputs[i].length;
     const inputArrPtr = Module._malloc(inputLen);
-    const inputArr = new Uint8Array(
-      Module.HEAPU8.buffer,
-      inputArrPtr,
-      inputLen
-    );
+    const inputArr = new Uint8Array(Module.HEAPU8.buffer, inputArrPtr, inputLen);
 
     inputArr.set(inputs[i]);
 
@@ -83,11 +63,7 @@ export function hmac_sha512(initKey: Buffer, inputs: Buffer[]) {
   return Buffer.from(outputArr);
 }
 
-export function chacha20poly1305Encrypt(
-  input: Buffer,
-  key: Buffer,
-  nonce: Buffer
-) {
+export function chacha20poly1305Encrypt(input: Buffer, key: Buffer, nonce: Buffer) {
   validateBuffer(input);
   validateBuffer(key, 32);
   validateBuffer(nonce, 12);
@@ -107,11 +83,7 @@ export function chacha20poly1305Encrypt(
   const tagLen = 16;
   const outputLen = inputLen + tagLen;
   const outputArrPtr = Module._malloc(outputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    outputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, outputLen);
 
   inputArr.set(input);
   keyArr.set(key);
@@ -134,17 +106,13 @@ export function chacha20poly1305Encrypt(
   Module._free(outputArrPtr);
 
   if (resultCode !== 0) {
-    throw Error("chacha20poly1305 encryption has failed!");
+    throw Error('chacha20poly1305 encryption has failed!');
   }
 
   return Buffer.from(outputArr);
 }
 
-export function chacha20poly1305Decrypt(
-  input: Buffer,
-  key: Buffer,
-  nonce: Buffer
-) {
+export function chacha20poly1305Decrypt(input: Buffer, key: Buffer, nonce: Buffer) {
   validateBuffer(input);
   validateBuffer(key, 32);
   validateBuffer(nonce, 12);
@@ -171,11 +139,7 @@ export function chacha20poly1305Decrypt(
 
   const outputLen = inputLen;
   const outputArrPtr = Module._malloc(outputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    outputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, outputLen);
 
   inputArr.set(input);
   tagArr.set(tag);
@@ -200,7 +164,7 @@ export function chacha20poly1305Decrypt(
   Module._free(tagArrPtr);
 
   if (resultCode !== 0) {
-    throw Error("chacha20poly1305 decryption has failed!");
+    throw Error('chacha20poly1305 decryption has failed!');
   }
 
   return Buffer.from(outputArr);
@@ -214,11 +178,7 @@ export function sha3_256(input: Buffer) {
 
   const outputLen = 32;
   const outputArrPtr = Module._malloc(outputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    outputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, outputLen);
 
   inputArr.set(input);
 
@@ -235,11 +195,11 @@ export function cardanoMemoryCombine(input, password) {
   validateBuffer(input);
   validateString(password);
 
-  if (password === "") {
+  if (password === '') {
     return input;
   }
 
-  const transformedPassword = blake2b(Buffer.from(password, "utf-8"), 32);
+  const transformedPassword = blake2b(Buffer.from(password, 'utf-8'), 32);
   const transformedPasswordLen = transformedPassword.length;
   const transformedPasswordArrPtr = Module._malloc(transformedPasswordLen);
   const transformedPasswordArr = new Uint8Array(
@@ -253,11 +213,7 @@ export function cardanoMemoryCombine(input, password) {
   const inputArr = new Uint8Array(Module.HEAPU8.buffer, inputArrPtr, inputLen);
 
   const outputArrPtr = Module._malloc(inputLen);
-  const outputArr = new Uint8Array(
-    Module.HEAPU8.buffer,
-    outputArrPtr,
-    inputLen
-  );
+  const outputArr = new Uint8Array(Module.HEAPU8.buffer, outputArrPtr, inputLen);
 
   inputArr.set(input);
   transformedPasswordArr.set(transformedPassword);
