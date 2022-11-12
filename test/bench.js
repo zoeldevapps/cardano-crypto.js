@@ -27,7 +27,7 @@ function keyGeneration() {
 
   console.log(`Key generations ${ITERATION_COUNT} x ${KEY_COUNT} keys`);
   console.log(`V1: ${v1Time}ms`);
-  console.log(`V2: ${v1Time}ms`);
+  console.log(`V2: ${v2Time}ms`);
   console.log('');
 }
 
