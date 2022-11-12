@@ -1,5 +1,14 @@
 test
 native
+emsdk
+config
+build.js
+tsconfig.json
+.github
 .npmignore
 .gitignore
+.prettierrc
+.prettierignore
+.eslintignore
+.eslintrc.js
 
