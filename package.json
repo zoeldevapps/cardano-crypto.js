@@ -1,6 +1,6 @@
 {
   "name": "cardano-glue",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "description": "Glue between ts/js apps and the cardano blockchain.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
