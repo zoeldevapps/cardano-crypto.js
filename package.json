@@ -1,7 +1,7 @@
 {
-  "name": "cardano-crypto",
+  "name": "cardano-blue",
   "version": "6.1.1",
-  "description": "input-output-hk/cardano-crypto compiled to pure javascript using Emscripten",
+  "description": "Glue between ts/js apps and the cardano blockchain.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
@@ -20,18 +20,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vacuumlabs/cardano-crypto"
+    "url": "git+https://github.com/zoeldevapps/cardano-glue"
   },
   "keywords": [
     "ed25519",
     "cardano",
-    "signature"
+    "signature",
+    "glue",
+    "crypto"
   ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zoeldevapps/cardano-crypto/issues"
+    "url": "https://github.com/zoeldevapps/cardano-glue/issues"
   },
-  "homepage": "https://github.com/zoeldevapps/cardano-crypto#readme",
+  "homepage": "https://github.com/zoeldevapps/cardano-glue#readme",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",

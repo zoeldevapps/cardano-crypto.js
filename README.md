@@ -1,106 +1,76 @@
-# cardano-crypto.js
+# 🧴cardano-glue
+
+The glue between typescript frontend and nodejs applications and the cardano blockchain. This library is a collection of cryptolibraries and functions useful for working with Cardano cryptocurrency, eliminating the need for many dependencies.
+
+For now the library provides the basic functions, but the aim is to extend the functionality past the basic primitives.
+
+The cryptographic functions are compiled to pure javascript using Emscripten.
 
 - [input-output-hk/cardano-crypto](https://github.com/input-output-hk/cardano-crypto/tree/master/cbits)
 - [haskell-crypto/cryptonite](https://github.com/haskell-crypto/cryptonite)
 - [grigorig/chachapoly](https://github.com/grigorig/chachapoly)
 
-Compiled to pure javascript using Emscripten. This is a collection of cryptolibraries and functions useful for working with Cardano cryptocurrency, eliminating the need for many dependencies.
+Originally forked from `vacuumlabs/cardano-crypto.js`. The original intent was to provide a common library to support crypto primitives, but even the library moved past that. Several utility and serialization functions were added. This library is a continuation building on top of the basic crypto functions.
+
+Existing alternatives:
+
+<dl>
+<dt>cardano-[multiplatform | serialization]-lib</dt>
+<dd><a href="https://github.com/dcspark/cardano-multiplatform-lib" target="_blank">multiplatform</a> & <a href="https://github.com/emurgo/cardano-serialization-lib" target="_blank">serialization</a> Rust compiled into wasm providing serialization and utility functions for wallets and dapps. Provides rich and <b>very</b> verbose 😞 API, which might not be everybody's cup of tea 🍵. Wasm might not play nice with some bundlers for the web, debugging can be challenging and currently the package size is > 1.5 MB 📈.</dd>
+<dt><a href="https://github.com/spacebudz/lucid" target="_blank">lucid</a></dt>
+<dd>Built on top of `cardano-multiplatform-lib` to provide a more functional-style expression. The library is more geared towards interacting with dapps.</dd>
+<dt><a href="https://github.com/StricaHQ/typhonjs" target="_blank">typhonjs</a></dt>
+<dd>Pure javascript Cardano wallet library. The library is geared more towards building wallet-type functionality.</dd>
+</dl>
 
 # Examples
 
 ## Signing
 
 ```javascript
-var lib = require("cardano-crypto.js");
+import * as glue from 'cardano-glue';
 
-var mnemonic =
-  "logic easily waste eager injury oval sentence wine bomb embrace gossip supreme";
-var walletSecret = await lib.mnemonicToRootKeypair(mnemonic, 1);
-var msg = new Buffer("hello there");
-var sig = lib.sign(msg, walletSecret);
+const mnemonic = 'logic easily waste eager injury oval sentence wine bomb embrace gossip supreme';
+const walletSecret = await glue.mnemonicToRootKeypair(mnemonic, 1);
+const msg = Buffer.from('hello there');
+const sig = glue.sign(msg, walletSecret);
 ```
 
 ## Deriving child keys (hardened derivation, you can choose either derivation scheme 1 or 2)
 
 ```javascript
-var lib = require("cardano-crypto.js");
+import * as glue from 'cardano-glue';
 
-var mnemonic =
-  "logic easily waste eager injury oval sentence wine bomb embrace gossip supreme";
-var parentWalletSecret = lib.mnemonicToRootKeypair(mnemonic, 1);
-var childWalletSecret = lib.derivePrivate(parentWalletSecret, 0x80000001, 1);
+const mnemonic = 'logic easily waste eager injury oval sentence wine bomb embrace gossip supreme';
+const parentWalletSecret = glue.mnemonicToRootKeypair(mnemonic, 1);
+const childWalletSecret = glue.derivePrivate(parentWalletSecret, 0x80000001, 1);
 ```
 
 ## Deriving child public keys (nonhardened derivation, you can choose either derivation scheme 1 or 2)
 
 ```javascript
-var lib = require("cardano-crypto.js");
+import * as glue from 'cardano-glue';
 
-var mnemonic =
-  "logic easily waste eager injury oval sentence wine bomb embrace gossip supreme";
-var parentWalletSecret = lib.mnemonicToRootKeypair(mnemonic, 1);
-var parentWalletPublicKey = parentWalletSecret.slice(64, 128);
-var childWalletSecret = lib.derivePublic(parentWalletPublicKey, 1, 1);
+const mnemonic = 'logic easily waste eager injury oval sentence wine bomb embrace gossip supreme';
+const parentWalletSecret = glue.mnemonicToRootKeypair(mnemonic, 1);
+const parentWalletPublicKey = parentWalletSecret.slice(64, 128);
+const childWalletSecret = glue.derivePublic(parentWalletPublicKey, 1, 1);
 ```
 
-# Available Functions
+# Docs
 
-## Signing/Verification
-
-- `Buffer sign(Buffer msg, Buffer walletSecret)`
-- `Bool verify(Buffer msg, Buffer publicKey, Buffer sig)`
-
-## Key derivation
-
-- `async Buffer mnemonicToRootKeypair(String mnemonic, int derivationScheme)`
-- `Buffer derivePrivate(Buffer parentKey, int index, int derivationScheme)`
-- `Buffer derivePublic(Buffer parentExtPubKey, int index, int derivationScheme)`
-- `Buffer toPublic(Buffer privateKey)`
-
-## Address encoding/decoding/validation
-
-- `Buffer packBootstrapAddress(Array[int] derivationPath, Buffer xpub, Buffer hdPassphrase, int derivationScheme, int protocolMagic)`
-- `Buffer packBaseAddress(Buffer spendingHash, Buffer stakingHash, int networkId, BaseAddressType type)`
-- `Buffer packPointerAddress(Buffer spendingHash, Object pointer, int networkId, Bool isScript)`
-- `Buffer packEnterpriseAddress(Buffer spendingHash, int networkId, Bool isScript)`
-- `Buffer packRewardAddress(Buffer stakingHash, int networkId, Bool isScript)`
-- `Object getAddressType(Buffer address)`
-- `Bool hasSpendingScript(Buffer address)`
-- `Bool hasStakingScript(Buffer address)`
-- `Object getShelleyAddressInfo(Buffer address)`
-- `Object AddressTypes`
-- `Object BaseAddressTypes`
-- `Buffer addressToBuffer(string address) // address can be either bech32 or base58 encoded`
-- `Map getBootstrapAddressAttributes(Buffer address)`
-- `Array<int>? getBootstrapAddressDerivationPath(Buffer address, Buffer hdPassphrase)`
-- `int getBootstrapAddressProtocolMagic(Buffer address)`
-- `Bool isValidBootstrapAddress(string address)`
-- `Bool isValidShelleyAddress(string address)`
-- `Buffer xpubToHdPassphrase(Buffer xpub)`
-- `Buffer getPubKeyBlake2b224Hash(Buffer pubKey)`
-
-## Cardano crypto primitives
-
-- `Buffer blake2b(Buffer input, outputLen)`
-- `Buffer cardanoMemoryCombine(Buffer input, String password)`
-- `string bech32.encode(string prefix, Buffer data)`
-- `Object bech32.decode(string address)`
-- `[base58](https://www.npmjs.com/package/base58)`
-- `[scrypt](https://www.npmjs.com/package/scrypt-async)`
-
-## Daedalus paper wallets (27-word mnemonics)
-
-- `Buffer decodePaperWalletMnemonic(string paperWalletMnemonic)`
+TBD - see package types
 
 We encourage you to take a look `at test/index.js` to see how the functions above should be used.
 
 # Development
 
-- Install [emscripten](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#installation-instructions), recommended version is 1.38.8
+- Install [emscripten](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#installation-instructions)
 - run `npm install`
+- run `npm run build:native`
 - run `npm run build`
 
-# Emscripten build example
+## Emscripten build example
 
 ```
 git clone https://github.com/emscripten-core/emsdk.git
@@ -109,18 +79,20 @@ cd emsdk
 ./emsdk activate 3.1.25
 source ./emsdk_env.sh
 cd ../
-git clone https://github.com/vacuumlabs/cardano-crypto.js
-cd cardano-crypto.js
+git clone https://github.com/zoeldevapps/cardano-glue
+cd cardano-glue
 npm install
-npm run build
-shasum lib.js # should match shasum of published version of lib.js
+npm run build:native
+shasum src/lib.js # should match shasum of published version of lib.js
 ```
 
-# tests
+The npm package is published via automated github workflows. Check out `.github/setup-with-native/action.yml`.
+
+## tests
 
 - run `npm run test`
 
-# Removing wordlists from webpack/browserify
+# Bundle size optimizations
 
 - [bitcoinjs/bip39](https://github.com/bitcoinjs/bip39)
 
@@ -147,7 +119,23 @@ You can also do this in Webpack using the `IgnorePlugin`. Here is an example of 
 ```javascript
 ...
 plugins: [
-  new webpack.IgnorePlugin(/^\.\/wordlists\/(?!english)/, /bip39\/src$/),
+  new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/wordlists\/(?!english)/,
+      contextRegExp: /bip39\/src$/,
+    }),
 ],
 ...
+```
+
+Alternatively you can use an alias to `bip39-light`. Example with `vite`:
+
+```js
+export default defineConfig({
+  /* ... */
+  resolve: {
+    alias: {
+      bip39: 'bip39-light',
+    },
+  },
+});
 ```
