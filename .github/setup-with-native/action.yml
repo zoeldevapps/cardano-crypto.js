@@ -21,8 +21,8 @@ runs:
         path: |
           emsdk/node
           emsdk/upstream
-        key: emsdk-${{ runner.os }}-${{ inputs.emsdk-version }}
-        restore-keys: emsdk-${{ runner.os }}-
+        key: emsdk-pkgs-${{ runner.os }}-${{ inputs.emsdk-version }}
+        restore-keys: emsdk-pkgs-${{ runner.os }}-
     - name: Build native
       run: |
         cd emsdk
