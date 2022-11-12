@@ -1,15 +1,16 @@
 const { build } = require("esbuild");
 const { dependencies } = require("./package.json");
+const { Generator } = require("npm-dts");
 
 const esbuildPlugin = require("node-stdlib-browser/helpers/esbuild/plugin");
 const stdLibBrowser = require("node-stdlib-browser");
 
-const entryFile = "src/index.js";
+const entryFile = "src/index.ts";
 const shared = {
   entryPoints: [entryFile],
   bundle: true,
-  sourcemap: true,
   minify: true,
+  sourcemap: true,
   external: Object.keys(dependencies),
   plugins: [],
 };
@@ -35,3 +36,12 @@ build({
   },
   plugins: [...shared.plugins, esbuildPlugin(stdLibBrowser)],
 });
+
+new Generator(
+  {
+    tsc: "-p config/tsconfig.declarations.json",
+    output: "dist/index.d.ts",
+  },
+  false,
+  true
+).generate();
