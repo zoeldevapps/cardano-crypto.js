@@ -91,7 +91,8 @@ export function packBootstrapAddress(
     validateBuffer(hdPassphrase, 32);
   }
 
-  let addressPayload, addressAttributes;
+  let addressPayload: Buffer;
+  let addressAttributes: Map<number, Buffer>;
   if (derivationScheme === 1 && derivationPath.length > 0 && hdPassphrase) {
     addressPayload = encryptDerivationPath(derivationPath, hdPassphrase);
     addressAttributes = new Map([[1, cbor.encode(addressPayload)]]);

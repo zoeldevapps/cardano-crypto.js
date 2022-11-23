@@ -37,6 +37,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
+    "@types/pbkdf2": "^3.1.0",
     "esbuild": "^0.15.13",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",

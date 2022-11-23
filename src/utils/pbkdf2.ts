@@ -1,6 +1,12 @@
-const { pbkdf2: pbkdf2Async, pbkdf2Sync } = require('pbkdf2');
+import { pbkdf2 as pbkdf2Async, pbkdf2Sync } from 'pbkdf2';
 
-const promisifiedPbkdf2 = (password, salt, iterations, length, algo) =>
+const promisifiedPbkdf2 = (
+  password: string | Buffer,
+  salt: string | Buffer,
+  iterations: number,
+  length: number,
+  algo: string
+): Promise<Buffer> =>
   new Promise((resolveFunction, rejectFunction) => {
     pbkdf2Async(password, salt, iterations, length, algo, (error, response) => {
       if (error) {
@@ -10,7 +16,13 @@ const promisifiedPbkdf2 = (password, salt, iterations, length, algo) =>
     });
   });
 
-const pbkdf2 = async (password, salt, iterations, length, algo) => {
+const pbkdf2 = async (
+  password: string | Buffer,
+  salt: string | Buffer,
+  iterations: number,
+  length: number,
+  algo: string
+) => {
   try {
     const result = await promisifiedPbkdf2(password, salt, iterations, length, algo);
     return result;
@@ -20,4 +32,4 @@ const pbkdf2 = async (password, salt, iterations, length, algo) => {
   }
 };
 
-module.exports = pbkdf2;
+export default pbkdf2;

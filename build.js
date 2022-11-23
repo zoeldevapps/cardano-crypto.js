@@ -10,6 +10,7 @@ const shared = {
   entryPoints: [entryFile],
   bundle: true,
   minify: true,
+  keepNames: true, // Necessary as due to minifaction the Buffer gets renamed
   sourcemap: true,
   external: Object.keys(dependencies),
   plugins: [],
@@ -26,6 +27,7 @@ build({
 // module build for browsers
 build({
   ...shared,
+  platform: 'browser',
   outfile: 'dist/index.esm.js',
   format: 'esm',
   inject: [require.resolve('node-stdlib-browser/helpers/esbuild/shim')],

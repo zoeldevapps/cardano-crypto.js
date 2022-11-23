@@ -1,5 +1,8 @@
-const cbor = require('cbor');
-module.exports = class CborIndefiniteLengthArray {
+import * as cbor from 'cbor';
+
+class CborIndefiniteLengthArray<T> {
+  elements: T[];
+
   constructor(elements) {
     this.elements = elements;
   }
@@ -13,4 +16,6 @@ module.exports = class CborIndefiniteLengthArray {
       ])
     );
   }
-};
+}
+
+export default CborIndefiniteLengthArray;
