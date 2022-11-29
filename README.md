@@ -12,6 +12,8 @@ The cryptographic functions are compiled to pure javascript using Emscripten.
 
 Originally forked from `vacuumlabs/cardano-crypto.js`. The original intent was to provide a common library to support crypto primitives, but even the library moved past that. Several utility and serialization functions were added. This library is a continuation building on top of the basic crypto functions.
 
+You can support this project through github [sponsors](https://github.com/sponsors/zoeldevapps).
+
 Existing alternatives:
 
 <dl>
